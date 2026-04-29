@@ -1,0 +1,24 @@
+# Quarto build output
+_site/
+.quarto/
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated data files (reproducible from create_sample_data.R)
+data/study_area.gpkg
+data/land_cover.tif
+data/obs_inside_study_area.gpkg
+data/habitat_suitability.tif
+
+# Generated figures
+figures/*.png
+figures/*.pdf
+figures/*.svg
