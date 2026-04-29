@@ -1,0 +1,425 @@
+---
+title: "R Spatial Tutorial for Conservation Biology"
+subtitle: "Vector and raster analysis, species distribution mapping with sf, terra, ggplot2, and tmap"
+author: "Conservation Biology Course"
+date: today
+---
+
+## Introduction
+
+This tutorial walks through a reproducible R workflow for analysing and
+visualising spatial biodiversity data. We will:
+
+1. Install and load the required packages.
+2. Load and inspect vector and raster data.
+3. Wrangle and summarise species occurrence records.
+4. Create static maps with `ggplot2`.
+5. Create interactive maps with `tmap`.
+6. Perform a simple habitat-suitability overlay.
+
+---
+
+## 1 – Required packages
+
+Install once (skip if already installed):
+
+```{r}
+#| label: install-packages
+#| eval: false
+
+install.packages(c(
+  "sf",        # vector data (Simple Features)
+  "terra",     # raster data
+  "ggplot2",   # static mapping
+  "tmap",      # thematic / interactive maps
+  "dplyr",     # data wrangling
+  "readr",     # fast CSV reading
+  "viridis",   # colour palettes
+  "ggspatial", # north arrow & scale bar for ggplot2
+  "scales"     # axis label formatting (e.g. percent_format)
+))
+```
+
+Load packages for this session:
+
+```{r}
+#| label: load-packages
+
+library(sf)
+library(terra)
+library(ggplot2)
+library(tmap)
+library(dplyr)
+library(readr)
+library(viridis)
+library(ggspatial)
+library(scales)
+```
+
+---
+
+## 2 – Loading spatial data
+
+### 2.1 Study-area polygon (vector)
+
+```{r}
+#| label: load-study-area
+
+study_area <- sf::st_read("data/study_area.gpkg", quiet = TRUE)
+print(study_area)
+```
+
+Key attributes to check:
+
+```{r}
+#| label: check-crs
+
+sf::st_crs(study_area)   # coordinate reference system
+sf::st_bbox(study_area)  # bounding box
+```
+
+### 2.2 Species occurrence records (CSV)
+
+```{r}
+#| label: load-observations
+
+obs_raw <- readr::read_csv("data/species_observations.csv", show_col_types = FALSE)
+head(obs_raw)
+```
+
+Convert to an `sf` point object:
+
+```{r}
+#| label: csv-to-sf
+
+obs <- sf::st_as_sf(
+  obs_raw,
+  coords = c("longitude", "latitude"),
+  crs    = 4326          # WGS 84
+)
+print(obs)
+```
+
+### 2.3 Land-cover raster
+
+```{r}
+#| label: load-raster
+
+lc <- terra::rast("data/land_cover.tif")
+print(lc)
+terra::plot(lc, main = "Land cover")
+```
+
+---
+
+## 3 – Data wrangling
+
+### 3.1 Reproject to a metric CRS
+
+For distance- or area-based analyses, project all layers to the same metric CRS.
+Here we use **UTM Zone 33N (EPSG:32633)**; adjust for your study region.
+
+```{r}
+#| label: reproject
+
+target_crs <- 32633
+
+study_area_utm <- sf::st_transform(study_area, crs = target_crs)
+obs_utm        <- sf::st_transform(obs,        crs = target_crs)
+lc_utm         <- terra::project(lc, paste0("EPSG:", target_crs),
+                                 method = "near")  # categorical raster
+```
+
+### 3.2 Clip observations to the study area
+
+```{r}
+#| label: clip-observations
+
+obs_inside <- obs_utm[sf::st_within(obs_utm, study_area_utm, sparse = FALSE), ]
+cat("Observations inside study area:", nrow(obs_inside), "\n")
+```
+
+### 3.3 Summarise by species
+
+```{r}
+#| label: species-summary
+
+species_count <- obs_inside |>
+  dplyr::count(species, name = "n_observations") |>
+  dplyr::arrange(dplyr::desc(n_observations))
+
+print(species_count)
+```
+
+### 3.4 Extract land-cover values at observation points
+
+```{r}
+#| label: extract-land-cover
+
+obs_lc <- obs_inside |>
+  dplyr::mutate(
+    land_cover_class = terra::extract(lc_utm, obs_inside)[, 2]
+  )
+
+table(obs_lc$land_cover_class, useNA = "ifany")
+```
+
+---
+
+## 4 – Static maps with ggplot2
+
+### 4.1 Basic observation map
+
+```{r}
+#| label: fig-obs-map
+#| fig-cap: "Species observations inside the study area."
+
+ggplot2::ggplot() +
+  ggplot2::geom_sf(data = study_area_utm, fill = "grey90", colour = "grey40") +
+  ggplot2::geom_sf(
+    data   = obs_inside,
+    ggplot2::aes(colour = species),
+    size   = 2,
+    alpha  = 0.8
+  ) +
+  viridis::scale_colour_viridis_d(option = "D", name = "Species") +
+  ggspatial::annotation_north_arrow(location = "tr", which_north = "true") +
+  ggspatial::annotation_scale(location = "bl") +
+  ggplot2::labs(
+    title    = "Species observations in the study area",
+    subtitle = "Conservation Biology Course",
+    x = NULL, y = NULL
+  ) +
+  ggplot2::theme_bw()
+```
+
+### 4.2 Observation density map
+
+```{r}
+#| label: fig-density-map
+#| fig-cap: "Spatial density of all observations."
+
+# Convert to a regular data frame for stat_density_2d
+obs_coords <- obs_inside |>
+  dplyr::mutate(
+    x = sf::st_coordinates(obs_inside)[, 1],
+    y = sf::st_coordinates(obs_inside)[, 2]
+  ) |>
+  sf::st_drop_geometry()
+
+ggplot2::ggplot() +
+  ggplot2::geom_sf(data = study_area_utm, fill = "grey95", colour = "grey40") +
+  ggplot2::stat_density_2d_filled(
+    data    = obs_coords,
+    ggplot2::aes(x = x, y = y, fill = ggplot2::after_stat(level)),
+    alpha   = 0.7,
+    contour_var = "ndensity"
+  ) +
+  viridis::scale_fill_viridis_d(option = "B", name = "Density") +
+  ggplot2::geom_sf(
+    data  = obs_inside,
+    size  = 1, shape = 3, colour = "white", alpha = 0.5
+  ) +
+  ggspatial::annotation_north_arrow(location = "tr", which_north = "true") +
+  ggspatial::annotation_scale(location = "bl") +
+  ggplot2::labs(
+    title = "Observation density",
+    x = NULL, y = NULL
+  ) +
+  ggplot2::theme_bw()
+```
+
+### 4.3 Bar chart of observations per land-cover class
+
+```{r}
+#| label: fig-lc-barplot
+#| fig-cap: "Number of observations per land-cover class."
+
+obs_lc |>
+  sf::st_drop_geometry() |>
+  dplyr::filter(!is.na(land_cover_class)) |>
+  dplyr::count(species, land_cover_class) |>
+  ggplot2::ggplot(ggplot2::aes(x = land_cover_class, y = n, fill = species)) +
+  ggplot2::geom_col(position = "dodge") +
+  viridis::scale_fill_viridis_d(option = "C", name = "Species") +
+  ggplot2::labs(
+    title = "Observations per land-cover class",
+    x     = "Land-cover class",
+    y     = "Number of observations"
+  ) +
+  ggplot2::theme_bw()
+```
+
+---
+
+## 5 – Interactive maps with tmap
+
+`tmap` can render maps in interactive (leaflet) mode – useful for exploring data
+before finalising figures.
+
+```{r}
+#| label: fig-tmap-interactive
+#| fig-cap: "Interactive map of species observations."
+
+tmap::tmap_mode("view")   # switch to interactive mode
+
+tmap::tm_shape(study_area_utm) +
+  tmap::tm_borders(col = "grey40", lwd = 1.5) +
+  tmap::tm_fill(col = "grey90", alpha = 0.4) +
+tmap::tm_shape(obs_inside) +
+  tmap::tm_dots(
+    col   = "species",
+    size  = 0.05,
+    alpha = 0.8,
+    title = "Species",
+    palette = "viridis"
+  ) +
+tmap::tm_layout(title = "Species observations")
+```
+
+Switch back to static mode for the remaining figures:
+
+```{r}
+#| label: tmap-static-mode
+
+tmap::tmap_mode("plot")
+```
+
+---
+
+## 6 – Habitat suitability overlay
+
+A simple presence-only habitat-suitability index based on land-cover preference.
+
+### 6.1 Calculate land-cover preference per species
+
+```{r}
+#| label: lc-preference
+
+# Proportion of observations in each land-cover class per species
+lc_pref <- obs_lc |>
+  sf::st_drop_geometry() |>
+  dplyr::filter(!is.na(land_cover_class)) |>
+  dplyr::group_by(species) |>
+  dplyr::count(land_cover_class) |>
+  dplyr::mutate(proportion = n / sum(n)) |>
+  dplyr::ungroup()
+
+print(lc_pref)
+```
+
+### 6.2 Map preferred land-cover per species
+
+```{r}
+#| label: fig-lc-preference
+#| fig-cap: "Land-cover preference per species (proportion of observations)."
+
+lc_pref |>
+  ggplot2::ggplot(ggplot2::aes(
+    x    = land_cover_class,
+    y    = proportion,
+    fill = species
+  )) +
+  ggplot2::geom_col(position = "dodge") +
+  viridis::scale_fill_viridis_d(option = "D", name = "Species") +
+  ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+  ggplot2::labs(
+    title = "Land-cover preference by species",
+    x     = "Land-cover class",
+    y     = "Proportion of observations"
+  ) +
+  ggplot2::theme_bw()
+```
+
+### 6.3 Reclassify raster to suitability score
+
+As a simplified example, assign a suitability score (0–3) to each land-cover
+class for one focal species:
+
+```{r}
+#| label: suitability-raster
+
+# Example lookup: class -> suitability (0 = unsuitable, 3 = most suitable)
+# Adjust class IDs to match your actual raster values
+suitability_matrix <- matrix(
+  c(1, 1,   # class 1 -> suitability 1 (e.g. agricultural land)
+    2, 3,   # class 2 -> suitability 3 (e.g. forest)
+    3, 2,   # class 3 -> suitability 2 (e.g. shrubland)
+    4, 0),  # class 4 -> suitability 0 (e.g. urban)
+  ncol = 2, byrow = TRUE
+)
+
+suitability <- terra::classify(lc_utm, suitability_matrix)
+names(suitability) <- "suitability"
+terra::plot(suitability, col = viridis::viridis(4), main = "Habitat suitability")
+```
+
+### 6.4 Suitability map with ggplot2
+
+```{r}
+#| label: fig-suitability-map
+#| fig-cap: "Habitat suitability raster overlaid with species observations."
+
+# Convert raster to data frame for ggplot2
+suit_df <- terra::as.data.frame(suitability, xy = TRUE) |>
+  dplyr::rename(score = suitability)
+
+ggplot2::ggplot() +
+  ggplot2::geom_raster(
+    data = suit_df,
+    ggplot2::aes(x = x, y = y, fill = score)
+  ) +
+  viridis::scale_fill_viridis_c(name = "Suitability", option = "D", na.value = "white") +
+  ggplot2::geom_sf(data = study_area_utm, fill = NA, colour = "black", linewidth = 0.8) +
+  ggplot2::geom_sf(
+    data  = obs_inside,
+    size  = 1.5, shape = 21,
+    fill  = "white", colour = "red", stroke = 0.5
+  ) +
+  ggspatial::annotation_north_arrow(location = "tr", which_north = "true") +
+  ggspatial::annotation_scale(location = "bl") +
+  ggplot2::labs(
+    title    = "Habitat suitability with species observations",
+    subtitle = "White circles = observation points",
+    x = NULL, y = NULL
+  ) +
+  ggplot2::coord_sf() +
+  ggplot2::theme_bw()
+```
+
+---
+
+## 7 – Saving outputs
+
+```{r}
+#| label: save-outputs
+#| eval: false
+
+# Export clipped observations
+sf::st_write(obs_inside, "data/obs_inside_study_area.gpkg", delete_dsn = TRUE)
+
+# Export suitability raster
+terra::writeRaster(suitability, "data/habitat_suitability.tif", overwrite = TRUE)
+
+# Save a ggplot figure
+ggplot2::ggsave(
+  filename = "figures/suitability_map.png",
+  width  = 18, height = 14, units = "cm", dpi = 300
+)
+```
+
+---
+
+## Summary
+
+In this tutorial you learned how to:
+
+- Load vector and raster data into R with `sf` and `terra`.
+- Reproject layers to a metric CRS.
+- Clip, join, and summarise spatial data.
+- Create publication-quality static maps with `ggplot2` and `ggspatial`.
+- Build interactive maps with `tmap`.
+- Perform a simple habitat-suitability reclassification.
+
+Return to the [QGIS Tutorial](qgis_tutorial.qmd) if you want to see how the
+same operations look in a graphical interface.

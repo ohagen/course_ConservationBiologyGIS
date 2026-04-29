@@ -1,0 +1,52 @@
+---
+title: "Conservation Biology – GIS Tutorials"
+subtitle: "Spatial analysis of biodiversity data with QGIS and R"
+author: "Conservation Biology Course"
+date: today
+---
+
+## Welcome
+
+This course introduces the spatial tools used in modern conservation biology.
+By the end of the two tutorials you will be able to:
+
+- Load, reproject, and query spatial data in **QGIS**.
+- Produce publication-quality maps and analyses in **R** using the `sf`, `terra`,
+  `ggplot2`, and `tmap` packages.
+
+## Course structure
+
+| Tutorial | Topic | Software |
+|----------|-------|----------|
+| [QGIS Tutorial](qgis_tutorial.qmd) | Map layers, projections, spatial queries, map export | QGIS 3.x |
+| [R Spatial Tutorial](r_spatial_tutorial.qmd) | Vector/raster analysis, species distribution mapping | R ≥ 4.2 |
+
+## Data
+
+Example data used throughout the tutorials live in the `data/` folder:
+
+| File | Description |
+|------|-------------|
+| `data/study_area.gpkg` | Study-area polygon (GeoPackage) |
+| `data/species_observations.csv` | Georeferenced species occurrence records |
+| `data/land_cover.tif` | Land-cover raster (GeoTIFF) |
+
+> **Note:** The data files provided are synthetic example datasets created for
+> teaching purposes. Replace them with your own field data when working through
+> the exercises.
+
+## Prerequisites
+
+- Basic familiarity with GIS concepts (coordinate systems, vector vs. raster).
+- R and RStudio (or any R IDE) installed.
+- QGIS 3.28 LTR or newer installed.
+- Quarto 1.4 or newer (only needed to re-render the tutorials).
+
+## Getting started
+
+Clone or download this repository, then open the project folder.  
+Render all tutorials at once with:
+
+```bash
+quarto render
+```

@@ -1,0 +1,205 @@
+---
+title: "QGIS Tutorial for Conservation Biology"
+subtitle: "Loading data, working with projections, spatial queries, and map export"
+author: "Conservation Biology Course"
+date: today
+---
+
+## Introduction
+
+QGIS is a free, open-source geographic information system that runs on Windows,
+macOS, and Linux. In this tutorial we will:
+
+1. Load vector and raster layers.
+2. Understand and assign coordinate reference systems (CRS).
+3. Perform basic spatial queries and attribute selections.
+4. Symbolise data and export a print-ready map.
+
+::: {.callout-note}
+Screenshots below were taken with **QGIS 3.34 "Prizren"** (LTR). The interface
+may look slightly different in other versions, but the steps are the same.
+:::
+
+---
+
+## 1 – Installing and launching QGIS
+
+1. Go to <https://qgis.org/download/> and download the **Long Term Release (LTR)**
+   installer for your operating system.
+2. Run the installer with the default options.
+3. Launch **QGIS Desktop** from your applications menu.
+
+---
+
+## 2 – Setting up a new project
+
+1. Open QGIS and choose **Project → New** (`Ctrl+N`).
+2. Immediately save the project: **Project → Save As…** and choose a folder inside
+   this repository (e.g. `qgis_project/ConservationBiology.qgz`).
+3. Set the **project CRS**:
+   - Open **Project → Properties → CRS**.
+   - Search for `EPSG:4326` (WGS 84) and click **OK**.
+
+> All layers will be reprojected on-the-fly to match this CRS when they are
+> added to the project.
+
+---
+
+## 3 – Loading data layers
+
+### 3.1 Loading a vector layer (GeoPackage)
+
+1. In the **Browser** panel (left side), navigate to `data/study_area.gpkg`.
+2. Double-click the file, or drag it onto the map canvas.
+3. The study-area polygon appears on the canvas.
+
+Alternatively, use the menu:
+
+- **Layer → Add Layer → Add Vector Layer…**
+- Set **Source Type** to *File* and browse to `data/study_area.gpkg`.
+- Click **Add**, then **Close**.
+
+### 3.2 Loading point observations (CSV)
+
+1. **Layer → Add Layer → Add Delimited Text Layer…**
+2. Browse to `data/species_observations.csv`.
+3. Under *Geometry Definition* set:
+   - **X field** → `longitude`
+   - **Y field** → `latitude`
+   - **Geometry CRS** → `EPSG:4326`
+4. Click **Add**, then **Close**.
+
+The species observation points are now displayed on the map.
+
+### 3.3 Loading a raster layer (GeoTIFF)
+
+1. **Layer → Add Layer → Add Raster Layer…**
+2. Browse to `data/land_cover.tif` and click **Add**.
+
+---
+
+## 4 – Working with coordinate reference systems
+
+Every spatial dataset has a CRS that describes how coordinates relate to
+locations on Earth. Mixing CRS without reprojecting leads to misaligned layers.
+
+### 4.1 Checking a layer's CRS
+
+- Right-click a layer in the **Layers** panel → **Properties → Information**.
+- The CRS is listed under *Coordinate Reference System*.
+
+### 4.2 Reprojecting a vector layer
+
+1. **Vector → Data Management Tools → Reproject Layer…**
+2. Set **Input layer** to `species_observations`.
+3. Set **Target CRS** to `EPSG:32633` (UTM Zone 33N – suitable for central Europe).
+4. Save the output as `data/species_observations_utm.gpkg`.
+5. Click **Run**.
+
+### 4.3 Reprojecting a raster layer
+
+1. **Raster → Projections → Warp (Reproject)…**
+2. Set **Input layer** to `land_cover`.
+3. Set **Target CRS** to `EPSG:32633`.
+4. Set **Resampling method** to *Nearest Neighbour* (for categorical data).
+5. Save the output and click **Run**.
+
+---
+
+## 5 – Spatial queries and attribute selections
+
+### 5.1 Select by attribute
+
+To select all observations of a particular species:
+
+1. Open the **Attribute Table** of `species_observations` (`F6`).
+2. Click the **Select features using an expression** button (ε icon).
+3. Enter the expression:
+
+   ```
+   "species" = 'Lynx lynx'
+   ```
+
+4. Click **Select Features**.
+
+Selected records are highlighted in yellow on the map and in the table.
+
+### 5.2 Select by location (spatial join)
+
+To find which observations fall inside the study area:
+
+1. **Vector → Research Tools → Select by Location…**
+2. **Select features from** → `species_observations`
+3. **where the features** → *intersect*
+4. **by comparing to the features from** → `study_area`
+5. Click **Run**.
+
+Only points inside the study-area polygon are selected.
+
+### 5.3 Export selected features
+
+1. Right-click `species_observations` in the Layers panel.
+2. **Export → Save Selected Features As…**
+3. Choose format *GeoPackage*, set a filename, and click **OK**.
+
+---
+
+## 6 – Symbolising layers
+
+### 6.1 Graduated colours for a raster
+
+1. Double-click `land_cover` → **Symbology** tab.
+2. Set **Render type** to *Paletted/Unique Values*.
+3. Click **Classify** to auto-assign a colour per land-cover class.
+4. Assign meaningful colours (e.g. green for forest, yellow for grassland).
+5. Click **OK**.
+
+### 6.2 Categorised symbols for points
+
+1. Double-click `species_observations` → **Symbology** tab.
+2. Set **Symbol** type to *Categorized*.
+3. **Column** → `species`.
+4. Click **Classify** and assign a distinct colour/symbol per species.
+5. Click **OK**.
+
+---
+
+## 7 – Creating a print layout (map export)
+
+1. **Project → New Print Layout…** – give it a name such as *Study Area Map*.
+2. The **Print Layout** editor opens.
+3. Add a map frame: **Add Item → Add Map** and draw a rectangle.
+4. Add a legend: **Add Item → Add Legend** – drag it to a corner.
+5. Add a north arrow: **Add Item → Add North Arrow**.
+6. Add a scale bar: **Add Item → Add Scale Bar**.
+7. Add a title: **Add Item → Add Label**, type your title and increase font size.
+8. Export the map:
+   - **Layout → Export as PDF…** to produce a vector PDF.
+   - **Layout → Export as Image…** to produce a PNG/JPEG.
+
+---
+
+## 8 – Useful QGIS plugins for conservation biology
+
+| Plugin | Purpose |
+|--------|---------|
+| **QuickMapServices** | Background satellite/OSM imagery |
+| **GBIF Occurrences** | Download species records from GBIF |
+| **Semi-Automatic Classification** | Supervised land-cover classification |
+| **Profile Tool** | Elevation profiles along transects |
+
+Install plugins via **Plugins → Manage and Install Plugins…**
+
+---
+
+## Summary
+
+In this tutorial you learned how to:
+
+- Load vector (GeoPackage, CSV) and raster (GeoTIFF) data in QGIS.
+- Inspect and change coordinate reference systems.
+- Select features by attribute and by spatial relationship.
+- Symbolise layers and create a print-ready map layout.
+
+Continue to the [R Spatial Tutorial](r_spatial_tutorial.qmd) to perform the
+same kinds of analysis programmatically in R.

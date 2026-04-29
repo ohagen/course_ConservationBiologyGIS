@@ -1,0 +1,29 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Conservation Biology – GIS Tutorials"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: qgis_tutorial.qmd
+        text: QGIS Tutorial
+      - href: r_spatial_tutorial.qmd
+        text: R Spatial Tutorial
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false

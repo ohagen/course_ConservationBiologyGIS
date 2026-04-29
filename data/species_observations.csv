@@ -1,0 +1,16 @@
+species,longitude,latitude,date,observer,notes
+Lynx lynx,14.2345,48.1234,2023-05-10,Mueller,tracks found near forest edge
+Lynx lynx,14.3012,48.0987,2023-05-12,Mueller,camera trap
+Lynx lynx,14.1890,48.2101,2023-06-01,Novak,direct sighting
+Canis lupus,14.4501,48.0501,2023-04-22,Fischer,scat collected
+Canis lupus,14.5012,47.9876,2023-04-25,Fischer,tracks in snow
+Canis lupus,14.3756,48.1345,2023-05-18,Novak,howling detected
+Ursus arctos,14.1234,48.3456,2023-06-15,Mueller,foraging signs
+Ursus arctos,14.0987,48.2987,2023-06-20,Mueller,den site
+Ursus arctos,14.2501,48.3012,2023-07-02,Fischer,direct sighting
+Cervus elaphus,14.3234,48.1789,2023-05-05,Novak,herd of 12
+Cervus elaphus,14.4012,48.0234,2023-05-07,Fischer,antler velvet stage
+Cervus elaphus,14.2789,48.2345,2023-05-20,Mueller,rut activity
+Capreolus capreolus,14.5234,48.1012,2023-04-18,Fischer,fawn with doe
+Capreolus capreolus,14.3501,48.0789,2023-04-30,Novak,male territory marking
+Capreolus capreolus,14.1501,48.2789,2023-05-25,Mueller,browsing damage observed
