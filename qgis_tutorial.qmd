@@ -21,6 +21,7 @@ may look slightly different in other versions, but the steps are the same.
 :::
 
 ---
+## Introduction 
 
 ## Installing and launching QGIS
 
