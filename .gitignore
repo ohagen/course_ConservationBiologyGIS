@@ -22,3 +22,6 @@ data/habitat_suitability.tif
 figures/*.png
 figures/*.pdf
 figures/*.svg
+
+/.quarto/
+**/*.quarto_ipynb

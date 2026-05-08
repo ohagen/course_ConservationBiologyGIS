@@ -19,7 +19,7 @@ visualising spatial biodiversity data. We will:
 
 ---
 
-## 1 – Required packages
+## Required packages
 
 Install once (skip if already installed):
 
@@ -54,11 +54,12 @@ library(readr)
 library(viridis)
 library(ggspatial)
 library(scales)
+
 ```
 
 ---
 
-## 2 – Loading spatial data
+## Loading spatial data
 
 ### 2.1 Study-area polygon (vector)
 
@@ -78,7 +79,7 @@ sf::st_crs(study_area)   # coordinate reference system
 sf::st_bbox(study_area)  # bounding box
 ```
 
-### 2.2 Species occurrence records (CSV)
+### Species occurrence records (CSV)
 
 ```{r}
 #| label: load-observations
@@ -112,7 +113,7 @@ terra::plot(lc, main = "Land cover")
 
 ---
 
-## 3 – Data wrangling
+## Data wrangling
 
 ### 3.1 Reproject to a metric CRS
 
@@ -166,7 +167,7 @@ table(obs_lc$land_cover_class, useNA = "ifany")
 
 ---
 
-## 4 – Static maps with ggplot2
+## Static maps with ggplot2
 
 ### 4.1 Basic observation map
 
@@ -182,7 +183,7 @@ ggplot2::ggplot() +
     size   = 2,
     alpha  = 0.8
   ) +
-  viridis::scale_colour_viridis_d(option = "D", name = "Species") +
+  scale_colour_viridis_d(option = "D", name = "Species") +
   ggspatial::annotation_north_arrow(location = "tr", which_north = "true") +
   ggspatial::annotation_scale(location = "bl") +
   ggplot2::labs(
@@ -215,7 +216,7 @@ ggplot2::ggplot() +
     alpha   = 0.7,
     contour_var = "ndensity"
   ) +
-  viridis::scale_fill_viridis_d(option = "B", name = "Density") +
+  scale_fill_viridis_d(option = "B", name = "Density") +
   ggplot2::geom_sf(
     data  = obs_inside,
     size  = 1, shape = 3, colour = "white", alpha = 0.5
@@ -241,7 +242,7 @@ obs_lc |>
   dplyr::count(species, land_cover_class) |>
   ggplot2::ggplot(ggplot2::aes(x = land_cover_class, y = n, fill = species)) +
   ggplot2::geom_col(position = "dodge") +
-  viridis::scale_fill_viridis_d(option = "C", name = "Species") +
+  scale_fill_viridis_d(option = "C", name = "Species") +
   ggplot2::labs(
     title = "Observations per land-cover class",
     x     = "Land-cover class",
@@ -252,7 +253,7 @@ obs_lc |>
 
 ---
 
-## 5 – Interactive maps with tmap
+## Interactive maps with tmap
 
 `tmap` can render maps in interactive (leaflet) mode – useful for exploring data
 before finalising figures.
@@ -260,7 +261,7 @@ before finalising figures.
 ```{r}
 #| label: fig-tmap-interactive
 #| fig-cap: "Interactive map of species observations."
-
+#| eval: false
 tmap::tmap_mode("view")   # switch to interactive mode
 
 tmap::tm_shape(study_area_utm) +
@@ -287,7 +288,7 @@ tmap::tmap_mode("plot")
 
 ---
 
-## 6 – Habitat suitability overlay
+## Habitat suitability overlay
 
 A simple presence-only habitat-suitability index based on land-cover preference.
 
@@ -321,7 +322,7 @@ lc_pref |>
     fill = species
   )) +
   ggplot2::geom_col(position = "dodge") +
-  viridis::scale_fill_viridis_d(option = "D", name = "Species") +
+  scale_fill_viridis_d(option = "D", name = "Species") +
   ggplot2::scale_y_continuous(labels = scales::percent_format()) +
   ggplot2::labs(
     title = "Land-cover preference by species",
@@ -369,7 +370,7 @@ ggplot2::ggplot() +
     data = suit_df,
     ggplot2::aes(x = x, y = y, fill = score)
   ) +
-  viridis::scale_fill_viridis_c(name = "Suitability", option = "D", na.value = "white") +
+  scale_fill_viridis_c(name = "Suitability", option = "D", na.value = "white") +
   ggplot2::geom_sf(data = study_area_utm, fill = NA, colour = "black", linewidth = 0.8) +
   ggplot2::geom_sf(
     data  = obs_inside,
@@ -389,7 +390,7 @@ ggplot2::ggplot() +
 
 ---
 
-## 7 – Saving outputs
+## Saving outputs
 
 ```{r}
 #| label: save-outputs

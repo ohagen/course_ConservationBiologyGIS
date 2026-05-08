@@ -4,15 +4,27 @@ project:
 
 website:
   title: "Conservation Biology – GIS Tutorials"
-  navbar:
-    left:
-      - href: index.qmd
-        text: Home
-      - href: qgis_tutorial.qmd
-        text: QGIS Tutorial
-      - href: r_spatial_tutorial.qmd
-        text: R Spatial Tutorial
+  sidebar:
+    style: docked
+    search: true
+    contents:
 
+      - section: "1. Einführung"
+        contents:
+          - index.qmd
+
+      - section: "2. Lecture"
+        contents:
+          - lecture1.qmd
+          - lecture2.qmd
+
+      - section: "3. QGIS"
+        contents:
+          - qgis_tutorial.qmd
+
+      - section: "4. R Spatial"
+        contents:
+          - r_spatial_tutorial.qmd
 format:
   html:
     theme: cosmo
