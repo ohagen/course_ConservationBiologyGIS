@@ -5,23 +5,24 @@ author: "Conservation Biology Course"
 date: today
 ---
 
-## Introduction
+## Overview
 
 QGIS is a free, open-source geographic information system that runs on Windows,
 macOS, and Linux. In this tutorial we will:
 
-1. Load vector and raster layers.
-2. Understand and assign coordinate reference systems (CRS).
-3. Perform basic spatial queries and attribute selections.
-4. Symbolise data and export a print-ready map.
+1. Introduction to Basics: Geographical coordinates, map projections, and coordinate reference systems (CRS).
+2. Learn about vector and raster layers (Load them).
+3. Understand and assign coordinate reference systems (CRS).
+4. Perform basic spatial queries and attribute selections.
+5. Symbolise data and export a print-ready map.
 
 ::: {.callout-note}
 Screenshots below were taken with **QGIS 3.34 "Prizren"** (LTR). The interface
 may look slightly different in other versions, but the steps are the same.
 :::
 
----
-## Introduction 
+## Introduction
+blablabla
 
 ## Installing and launching QGIS
 

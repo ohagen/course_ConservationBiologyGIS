@@ -1,6 +1,6 @@
 ---
-title: "Conservation Biology – GIS Tutorials"
-subtitle: "Spatial analysis of biodiversity data with QGIS and R"
+title: "Practical Part"
+subtitle: "Biotype Mapping and Data Processing with QGIS and R"
 author: "Conservation Biology Course"
 date: today
 ---
