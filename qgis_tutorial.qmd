@@ -7,201 +7,287 @@ date: today
 
 ## Overview
 
-QGIS is a free, open-source geographic information system that runs on Windows,
-macOS, and Linux. In this tutorial we will:
+In this tutorial we will:
 
-1. Introduction to Basics: Geographical coordinates, map projections, and coordinate reference systems (CRS).
-2. Learn about vector and raster layers (Load them).
-3. Understand and assign coordinate reference systems (CRS).
-4. Perform basic spatial queries and attribute selections.
-5. Symbolise data and export a print-ready map.
+1.  Introduction to Basics: Geographical coordinates, map projections, and coordinate reference systems (CRS).
+2.  Learn about vector and raster layers (Load them).
+3.  Understand and assign coordinate reference systems (CRS).
+4.  Perform basic spatial queries and attribute selections.
+5.  Symbolise data and export a print-ready map.
 
-::: {.callout-note}
-Screenshots below were taken with **QGIS 3.34 "Prizren"** (LTR). The interface
-may look slightly different in other versions, but the steps are the same.
+::: callout-note
+Screenshots below were taken with **QGIS 3.34 "Prizren"** (LTR). The interface may look slightly different in other versions, but the steps are the same.
 :::
 
 ## Introduction
-blablabla
+
+A GIS (Geographic Information Systems) is an information system dealing with information concerning phenomena associated with location relative to the Earth.
+
+-   **Visualization**: Creation of static or interactive maps in 2D and 3D, charts, dash- boards, and other visualizations.
+-   **Spatial Analysis**: Geoprocessing of spatial data to identify patterns and relationships and to model processes.
+-   **Geodata Management**: Creating, storing, and organizing data with locations (geometries) and properties (attributes) in a database.
+-   **Communication**: User-centered dissemination of geographic information via digital maps, apps, and WebGIS platforms.
+
+![GIS as a layer-based information model](figures/GIS_Introduction.png){fig-align="center" width="10cm"}
+
+Using QGIS for biotope mapping in this practical course.
+
+![](figures/GIS_Introduction_timetable.png){width="10cm"}
+
+Why we use QGIS in this course: - Open-source and free to use. - instead of ArcGIS, which is expensive and has restrictive licensing. - Money saved can be invested in fieldwork and conservation actions instead. - Lots of projects and organisations use QGIS, because it is free and open-source --\> large user community and many online resources for learning and troubleshooting.
+
+### Coordinate reference systems (CRS)
+
+![](figures/GIS_Introduction_Coordinates.png){width="10cm" height="7.3cm"}
+
+### Geograhic/ spherical coordinate System: degrees \[°\], minutes \['\], seconds \["\] (1° = 60' = 3600")
+
+````         
+```         
+-   Latitude (φ): north-south position, ranges from -90° (South Pole) to +90° (North Pole)
+```
+
+-   
+
+    -   Longitude (λ): east-west position, ranges from -180° to +180°, with 0° at the Prime Meridian (Greenwich, UK)
+````
+
+Disadvantages of geographic coordinates: - Not suitable for distance/area calculations, because the Earth is a sphere. - Distances between degrees vary with latitude (1° longitude is \~111 km at the equator but 0 km at the poles). - Not ideal for mapping or spatial analysis.
+
+--\> How to project geographic coordinates 3D to a flat map 2D?
+
+Solution: geometric projection of the sphere or ellipsoid surface onto the map plane, as tangent or secant projection Projected coordinate systems with geodetic (metric) coordinate units
+
+-   Using a suitable map projection type to produce medium to large-scale maps of a specific part of the world with the least possible distortion
+
+-   Creating a grid with rectangular (Cartesian) geodetic units (usually meters) for easy entry of coordinates and accurate measurement
+
+```         
+![](figures/GIS_Introduction_CRS.png){width="10cm"}
+```
+
+### Different data structures
+
+1.  **Vector data**: points, lines, and polygons with unique numbers (object IDs). Geometry is described by vertex coordinates (x, y) and attributes are stored in a table (e.g. species name, observation date). Object properties are stored in an attribute table, expressed on the map via graphical variables of the map symbol (size, shape, colour, brightness, pattern, direction). Vector format can also be used for the partial representation of continuous phenomena, e.g. terrain elevation as contour points or contour lines.
+
+    ![](figures/Gis_Introduction_vectordata.png){width="10cm"}
+
+2.  **Raster data**: Space is divided into regular square grid cells (stored as values in a numerical matrix). Geometry is described by row, column and cell size. Attribute information is stored as a cell value and expressed via the colour of the raster pixel. Rasters are particularly suitable for the spatial representation of continuous phenomena.
+
+![](figures/Gis_Introduction_rasterdata.png){width="10cm"}
+
+3.  **Attribute data**:
+    -   nominal (e.g. land-cover class, species name)
+
+    -   ordinal (e.g. habitat suitability score: low, medium, high) (text, integer)
+
+    -   metric: interval scale (date, temperature in °C) (integer or real number) or ratio scale (population density, vegetation cover) (integer, real number)
+
+| Data Type | Storable values | Usage | Size |
+|------------------|------------------|------------------|------------------|
+| Short integer | Integers from -32,768 to 32,768 | Numbers without decimal places | 16-bit (2 bytes) |
+| Long integer | Integers from -2,147,483,648 to 2,147,483,648 | Large numbers without decimal places 3 | 32-bit (4 bytes) |
+| Float | approx. -3.4×10-38 to 1.2×10 | Floating-point numbers with or without decimal places (single field length) | 32-bit (4 bytes) |
+| Double | approx. -2.2*E-308 to 1.8*E308 | Floating-point numbers with or without decimal places (double field length) | 64 bits (8 bytes) |
+| Text / string | up to 2,147,483,647 characters | Text, e.g. names or descriptions | depending on length |
+| Date | MM/dd/yyyy hh:mm:ss AM/PM | Date and time specifications | 32-bit (4 bytes) |
+
+: Data types for fields in attribute tables
 
 ## Installing and launching QGIS
 
-1. Go to <https://qgis.org/download/> and download the **Long Term Release (LTR)**
-   installer for your operating system.
-2. Run the installer with the default options.
-3. Launch **QGIS Desktop** from your applications menu.
+1.  Go to <https://qgis.org/download/> and download the **Long Term Release (LTR)** installer for your operating system.
+2.  Run the installer with the default options.
+3.  Launch **QGIS Desktop** from your applications menu.
 
----
+------------------------------------------------------------------------
 
 ## Setting up a new project
 
-1. Open QGIS and choose **Project → New** (`Ctrl+N`).
-2. Immediately save the project: **Project → Save As…** and choose a folder inside
-   this repository (e.g. `qgis_project/ConservationBiology.qgz`).
-3. Set the **project CRS**:
-   - Open **Project → Properties → CRS**.
-   - Search for `EPSG:4326` (WGS 84) and click **OK**.
+1.  Open QGIS and choose **Project → New** (`Ctrl+N`).
+2.  Immediately save the project: **Project → Save As…** and choose a folder inside this repository (e.g. `qgis_project/ConservationBiology.qgz`).
+3.  Set the **project CRS**:
+    -   Open **Project → Properties → CRS**.
+    -   Search for `EPSG:25832` (WGS 84 / UTM Zone 32N) and click **OK**.
 
-> All layers will be reprojected on-the-fly to match this CRS when they are
-> added to the project.
+> All layers will be reprojected on-the-fly to match this CRS when they are added to the project. This allows you to work with layers in different CRSs without having to reproject them manually. However, for accurate spatial analysis and mapping, it is best to use a projected CRS suitable for your study area (e.g. UTM Zone 32N, EPSG:25832).
 
----
-
-## Loading data layers
-
-### Loading a vector layer (GeoPackage)
-
-1. In the **Browser** panel (left side), navigate to `data/study_area.gpkg`.
-2. Double-click the file, or drag it onto the map canvas.
-3. The study-area polygon appears on the canvas.
-
-Alternatively, use the menu:
-
-- **Layer → Add Layer → Add Vector Layer…**
-- Set **Source Type** to *File* and browse to `data/study_area.gpkg`.
-- Click **Add**, then **Close**.
-
-### Loading point observations (CSV)
-
-1. **Layer → Add Layer → Add Delimited Text Layer…**
-2. Browse to `data/species_observations.csv`.
-3. Under *Geometry Definition* set:
-   - **X field** → `longitude`
-   - **Y field** → `latitude`
-   - **Geometry CRS** → `EPSG:4326`
-4. Click **Add**, then **Close**.
-
-The species observation points are now displayed on the map.
-
-### Loading a raster layer (GeoTIFF)
-
-1. **Layer → Add Layer → Add Raster Layer…**
-2. Browse to `data/land_cover.tif` and click **Add**.
-
----
-
+|  |
+|:-----------------------------------------------------------------------|
+| \### Loading background basemap layers To provide geographic context, we can add a basemap layer from an online service such as OpenStreetMap. Therefore we will use the **QuickMapServices** plugin: Go to **Plugins → Manage and Install Plugins…**, search for "QuickMapServices", and click **Install**. Once installed, you can add a basemap layer: Open StreetMap → OSM Standard. Now this Layer is added to your project and you can use it as a reference for your field data and mapping. You can also add other basemap layers (e.g. satellite imagery) using the same plugin. |
+| \### Loading a vector layer (GeoPackage) |
+| 1\. In the **Browser** panel (left side), navigate to `data/study_area.gpkg`. 2. Double-click the file, or drag it onto the map canvas. 3. The study-area polygon appears on the canvas. |
+| Alternatively, use the menu: |
+| \- **Layer → Add Layer → Add Vector Layer…** - Set **Source Type** to *File* and browse to `data/study_area.gpkg`. - Click **Add**, then **Close**. |
+| \### Loading point observations (CSV) |
+| 1\. **Layer → Add Layer → Add Delimited Text Layer…** 2. Browse to `data/species_observations.csv`. 3. Under *Geometry Definition* set: - **X field** → `longitude` - **Y field** → `latitude` - **Geometry CRS** → `EPSG:25832` 4. Click **Add**, then **Close**. |
+| The species observation points are now displayed on the map. |
+| \### Loading a raster layer (GeoTIFF) |
+| 1\. **Layer → Add Layer → Add Raster Layer…** 2. Browse to `data/land_cover.tif` and click **Add**. |
+-----------------------------------------------------------------------
 ## Working with coordinate reference systems
 
-Every spatial dataset has a CRS that describes how coordinates relate to
-locations on Earth. Mixing CRS without reprojecting leads to misaligned layers.
+Every spatial dataset has a CRS that describes how coordinates relate to locations on Earth. Mixing CRS without reprojecting leads to misaligned layers.
 
 ### Checking a layer's CRS
 
-- Right-click a layer in the **Layers** panel → **Properties → Information**.
-- The CRS is listed under *Coordinate Reference System*.
+-   Right-click a layer in the **Layers** panel → **Properties → Information**.
+-   If the CRS is not defined, it will say "Unknown CRS". You can set it by going to **Properties → Source → Geometry** and clicking the **Set CRS** button. Choose the correct CRS (e.g. `EPSG:25832` for geographic coordinates).
+-   The CRS is listed under *Coordinate Reference System*.
+-   As you add layers, they will be reprojected on-the-fly to match the project CRS (EPSG:25832). However, for accurate analysis and mapping, it's best to reproject your data to a suitable projected CRS (e.g. UTM Zone 32N) before performing spatial operations.
 
 ### Reprojecting a vector layer
 
-1. **Vector → Data Management Tools → Reproject Layer…**
-2. Set **Input layer** to `species_observations`.
-3. Set **Target CRS** to `EPSG:32633` (UTM Zone 33N – suitable for central Europe).
-4. Save the output as `data/species_observations_utm.gpkg`.
-5. Click **Run**.
+We will reproject the `species_observations` layer from geographic coordinates (EPSG:4326) to a projected CRS suitable for our study area (e.g. UTM Zone 33N!!, EPSG:32633).
+
+1.  **Vector → Data Management Tools → Reproject Layer…**
+2.  Set **Input layer** to `species_observations`.
+3.  Set **Target CRS** to `EPSG:32633` (UTM Zone 33N – suitable for central Europe).
+4.  Save the output as `data/species_observations_utm.gpkg`.
+5.  Click **Run**.
 
 ### Reprojecting a raster layer
 
-1. **Raster → Projections → Warp (Reproject)…**
-2. Set **Input layer** to `land_cover`.
-3. Set **Target CRS** to `EPSG:32633`.
-4. Set **Resampling method** to *Nearest Neighbour* (for categorical data).
-5. Save the output and click **Run**.
+1.  **Raster → Projections → Warp (Reproject)…**
+2.  Set **Input layer** to `land_cover`.
+3.  Set **Target CRS** to `EPSG:32633`.
+4.  Set **Resampling method** to *Nearest Neighbour* (for categorical data).
+5.  Save the output and click **Run**.
 
----
+Now your Project should look like this:
+
+![](figures/QGIS_Tutorial_start.png){fig-align="center" width="10cm"}
+
+------------------------------------------------------------------------
+
+## Change Properties of a layer
+
+To change the symbology of a layer, right-click the layer in the **Layers** panel and select **Properties**. In the **Symbology** tab, you can choose how to represent your data (e.g. colour, size, shape). For example, you can set the `species_observations` points to be coloured by species name or sized by observation count.
+
+![](figures/QGIS_Tutorial_properties.png){fig-align="center" width="10cm"}
+
+------------------------------------------------------------------------
+
+## Add vector datasets (Paths, Streets, Rivers, etc.)
+
+You can add additional vector datasets by yourself to your project, such as roads, rivers, or administrative boundaries. Create new Geopackage Layer and digitise these features manually. 1. **Layer → Create Layer → New GeoPackage Layer…** 2. Set **Database** to `data/your_project.gpkg` and **Layer name** to e.g. `roads`. 3. Set **Geometry type** to *Line* and add fields for attributes (e.g. `name` for road name). 4. Click **OK** and the new layer will be added to your project. You can then use the **Digitising tools** to draw roads, rivers. Make sure to save your edits when done.
+
+------------------------------------------------------------------------
 
 ## Spatial queries and attribute selections
 
 ### Select by attribute
 
-To select all observations of a particular species:
+To select all observations of a particular biotope type:
 
-1. Open the **Attribute Table** of `species_observations` (`F6`).
-2. Click the **Select features using an expression** button (ε icon).
-3. Enter the expression:
+1.  Open the **Attribute Table** of `Biotype_mapping_GroupX - Biotype_polygons` (`F6`).
 
-   ```
-   "species" = 'Lynx lynx'
-   ```
+2.  Click the **Select features using an expression** button (ε icon).
 
-4. Click **Select Features**.
+3.  Enter the expression:
+
+    ```         
+    "biotope_type_number" = '8140'
+    ```
+
+4.  Click **Select Features**.
 
 Selected records are highlighted in yellow on the map and in the table.
 
-### 5.2 Select by location (spatial join)
+### Select by location (spatial join)
 
 To find which observations fall inside the study area:
 
-1. **Vector → Research Tools → Select by Location…**
-2. **Select features from** → `species_observations`
-3. **where the features** → *intersect*
-4. **by comparing to the features from** → `study_area`
-5. Click **Run**.
+1.  **Vector → Research Tools → Select by Location…**
+2.  **Select features from** → `species_observations`
+3.  **where the features** → *intersect*
+4.  **by comparing to the features from** → `study_area`
+5.  Click **Run**.
 
 Only points inside the study-area polygon are selected.
 
-### 5.3 Export selected features
+### Export selected features
 
-1. Right-click `species_observations` in the Layers panel.
-2. **Export → Save Selected Features As…**
-3. Choose format *GeoPackage*, set a filename, and click **OK**.
+1.  Right-click `Biotype_polygons` in the Layers panel.
+2.  **Export → Save Selected Features As…**
+3.  Choose format *GeoPackage*, set a filename, and click **OK**.
 
----
+------------------------------------------------------------------------
 
 ## Symbolising layers
 
-### Graduated colours for a raster
+### Categorized colours for points or polygons
 
-1. Double-click `land_cover` → **Symbology** tab.
-2. Set **Render type** to *Paletted/Unique Values*.
-3. Click **Classify** to auto-assign a colour per land-cover class.
-4. Assign meaningful colours (e.g. green for forest, yellow for grassland).
-5. Click **OK**.
+1.  Double-click `Biotype_polygons` → **Symbology** tab.
+2.  Set **Single Symbol** to *Categorized*.
+3.  **Value** → `biotope_type_number`.
+4.  Click **Classify** to auto-assign a colour per Biotope Type class.
+5.  Assign meaningful colours (e.g. green for forest, yellow for grassland).
+6.  Click **OK**.
 
-### Categorised symbols for points
+![](figures/QGIS_Tutorial_polygon_categories.png){fig-align="center" width="10cm"}
 
-1. Double-click `species_observations` → **Symbology** tab.
-2. Set **Symbol** type to *Categorized*.
-3. **Column** → `species`.
-4. Click **Classify** and assign a distinct colour/symbol per species.
-5. Click **OK**.
+### Edit Polygons
+Sometimes you need to edit the geometry of your polygons (e.g. to correct digitising errors or to merge adjacent polygons). To do this:
 
----
+1.  Ensure the layer is in **Editing** mode (pencil icon).
+2.  Set transparency of the layer to see underlying features (e.g. 50%).
+3.  Select the polygon(s) you want to edit.
+4.  Use the **Node Tool** (F2) to modify vertices or edges. Other tools you can use: 
+    - **Move Feature** (F1) to move entire polygons. 
+    - **Add Ring** to add holes or islands. 
+    - **Delete Ring** to remove holes. 
+    - **Merge Selected Features** to combine adjacent polygons into one.
+5.  Save your edits.
+
+### Edit Attributes
+
+To edit the attributes of a feature (e.g. to assign a biotope type number): 
+1. Open the **Attribute Table** of the layer with a right click.
+2. Click the **Toggle Editing Mode** (pencil icon).
+3. Select the feature you want to edit (e.g. a polygon) or select **New Field** to add a new attribute.
+4. Click the cell you want to edit and enter the new value (e.g. `8140` for a forest biotope type) or type in the new field name and data type (e.g. `biotope_conservation_status` as an text).
+5. Save your edits.
+
+------------------------------------------------------------------------
 
 ## Creating a print layout (map export)
 
-1. **Project → New Print Layout…** – give it a name such as *Study Area Map*.
-2. The **Print Layout** editor opens.
-3. Add a map frame: **Add Item → Add Map** and draw a rectangle.
-4. Add a legend: **Add Item → Add Legend** – drag it to a corner.
-5. Add a north arrow: **Add Item → Add North Arrow**.
-6. Add a scale bar: **Add Item → Add Scale Bar**.
-7. Add a title: **Add Item → Add Label**, type your title and increase font size.
-8. Export the map:
-   - **Layout → Export as PDF…** to produce a vector PDF.
-   - **Layout → Export as Image…** to produce a PNG/JPEG.
+1.  **Project → New Print Layout…** – give it a name such as *Study Area Map*.
+2.  The **Print Layout** editor opens.
+3.  Add a map frame: **Add Item → Add Map** and draw a rectangle.
+4.  Add a legend: **Add Item → Add Legend** – drag it to a corner.
+5.  Add a north arrow: **Add Item → Add North Arrow**.
+6.  Add a scale bar: **Add Item → Add Scale Bar**.
+7.  Add a title: **Add Item → Add Label**, type your title and increase font size.
+8.  Export the map:
+    -   **Layout → Export as PDF…** to produce a vector PDF.
+    -   **Layout → Export as Image…** to produce a PNG/JPEG.
 
----
+
+
+------------------------------------------------------------------------
 
 ## Useful QGIS plugins for conservation biology
 
-| Plugin | Purpose |
-|--------|---------|
-| **QuickMapServices** | Background satellite/OSM imagery |
-| **GBIF Occurrences** | Download species records from GBIF |
+| Plugin                            | Purpose                              |
+|-----------------------------------|--------------------------------------|
+| **QuickMapServices**              | Background satellite/OSM imagery     |
+| **GBIF Occurrences**              | Download species records from GBIF   |
 | **Semi-Automatic Classification** | Supervised land-cover classification |
-| **Profile Tool** | Elevation profiles along transects |
+| **Profile Tool**                  | Elevation profiles along transects   |
 
 Install plugins via **Plugins → Manage and Install Plugins…**
 
----
+------------------------------------------------------------------------
 
 ## Summary
 
 In this tutorial you learned how to:
 
-- Load vector (GeoPackage, CSV) and raster (GeoTIFF) data in QGIS.
-- Inspect and change coordinate reference systems.
-- Select features by attribute and by spatial relationship.
-- Symbolise layers and create a print-ready map layout.
+-   Load vector (GeoPackage, CSV) and raster (GeoTIFF) data in QGIS.
+-   Inspect and change coordinate reference systems.
+-   Select features by attribute and by spatial relationship.
+-   Symbolise layers and create a print-ready map layout.
 
-Continue to the [R Spatial Tutorial](r_spatial_tutorial.qmd) to perform the
-same kinds of analysis programmatically in R.
+Continue to the [R Spatial Tutorial](r_spatial_tutorial.qmd) to perform the same kinds of analysis programmatically in R.

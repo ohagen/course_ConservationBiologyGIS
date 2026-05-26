@@ -1,7 +1,0 @@
----
-title: "Part 1"
----
-
-# Lecture
-
-Coming soon.

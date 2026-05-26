@@ -15,7 +15,7 @@ website:
 
       - section: "2. QField - Fieldwork Application"
         contents:
-          - lecture1.qmd
+          - qfield_tutorial.qmd
           
 
       - section: "3. QGIS - Data Processing and Visualization"

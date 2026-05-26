@@ -7,16 +7,20 @@ date: today
 
 ## Welcome
 
-This course introduces the spatial tools used in modern conservation biology. By the end of the two tutorials you will be able to:
+In this practical part of the course we will work with geospatial data related to a 'hypothetical' conservation project. The tutorials will guide you through the process of collecting field data with QField, analyzing and visualizing it in R, and creating maps in QGIS. With that you sould be able to apply the same workflow to your own field data and conservation projects.
 
--   Load, reproject, and query spatial data in **QGIS**.
--   Produce publication-quality maps and analyses in **R** using the `sf`, `terra`, `ggplot2`, and `tmap` packages.
+Therfore you will get introductions of - how to use QField for field data collection and biotope mapping, - how to load and analyse your geospatial data in QGis, - how to create maps and use Ellenberg indicator values to assess the habitat status.
+
+In the end you will be able to use the creted maps for your protocols and presentations.
+
+The tutorials are designed to be self-contained, but you can also work through them in any order that suits your interests and needs. The data provided is synthetic example data created for teaching purposes, so feel free to replace it with your own field data when working through the exercises.
 
 ## Course structure
 
 | Tutorial | Topic | Software |
 |---------------------------|-------------------|---------------------------|
-| [QGIS Tutorial](qgis_tutorial.qmd) | Map layers, projections, spatial queries, map export | QGIS 3.x |
+| [QField Tutorial](qfield_tutorial.qmd) | Fieldwork, Biotope types | QField v4.1.12 |
+| [QGIS Tutorial](qgis_tutorial.qmd) | Map layers, projections, spatial queries, map export | QGIS 4.0 |
 | [R Spatial Tutorial](r_spatial_tutorial.qmd) | Vector/raster analysis, species distribution mapping | R ≥ 4.2 |
 
 ## Data
@@ -24,14 +28,14 @@ This course introduces the spatial tools used in modern conservation biology. By
 Example data used throughout the tutorials live in the `data/` folder:
 
 | File                            | Description                              |
-|-----------------------|-------------------------------------------------|
+|------------------------|------------------------------------------------|
 | `data/study_area.gpkg`          | Study-area polygon (GeoPackage)          |
 | `data/species_observations.csv` | Georeferenced species occurrence records |
 | `data/land_cover.tif`           | Land-cover raster (GeoTIFF)              |
 
 > **Note:** The data files provided are synthetic example datasets created for teaching purposes. Replace them with your own field data when working through the exercises.
 
-## Prerequisites
+## Prerequisites (but not mandatory)
 
 -   Basic familiarity with GIS concepts (coordinate systems, vector vs. raster).
 -   R and RStudio (or any R IDE) installed.
