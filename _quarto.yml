@@ -3,31 +3,28 @@ project:
   output-dir: _site
 
 website:
-  title: "Conservation Biology – Biotype Mapping and Data Processing"
+  title: "Conservation Biology – Biotope Mapping and Data Processing"
+
   sidebar:
     style: docked
     search: true
     contents:
-
-      - section: "1. Introduction"
-        contents:
-          - index.qmd
-
-      - section: "2. QField - Fieldwork Application"
-        contents:
-          - qfield_tutorial.qmd
-          
-
-      - section: "3. QGIS - Data Processing and Visualization"
+      - index.qmd
+      - qfield_tutorial.qmd
+      - section: "3. 💻 QGIS Tutorial"
         contents:
           - qgis_tutorial.qmd
+          - qis_workflow.qmd
+      - r_spatial_tutorial.qmd
 
-      - section: "4.Spatial Data Analysis in R"
+      - section: "📚 Additional Resources"
         contents:
-          - r_spatial_tutorial.qmd
+          - cheat_sheet.qmd
+
 format:
   html:
     theme: cosmo
+    css: styles.css
     toc: true
     toc-depth: 3
     number-sections: true

@@ -51,13 +51,36 @@ land_cover_values <- sample(1:4, size = terra::ncell(r), replace = TRUE,
 
 terra::values(r)   <- land_cover_values
 names(r)           <- "land_cover"
-terra::coltab(r)   <- data.frame(
-  value  = 1:4,
-  col    = c("#FFD700", "#228B22", "#8FBC8F", "#A9A9A9"),
-  label  = c("Agricultural", "Forest", "Shrubland", "Urban")
-)
+#terra::coltab(r)   <- data.frame(
+ # value  = 1:4,
+  #col    = c("#FFD700", "#228B22", "#8FBC8F", "#A9A9A9"),
+  #label  = c("Agricultural", "Forest", "Shrubland", "Urban")
+# )
 
 terra::writeRaster(r, "data/land_cover.tif", overwrite = TRUE)
 message("Written: data/land_cover.tif")
 
 message("Sample data creation complete.")
+
+# ------------------------------------------------------------------
+# 3. Species observations
+# ------------------------------------------------------------------
+
+set.seed(123)
+
+observations <- data.frame(
+  species = sample(
+    c("Fox", "Red Deer", "Wild Boar"),
+    100,
+    replace = TRUE
+  ),
+  longitude = runif(100, 13.95, 14.65),
+  latitude = runif(100, 47.85, 48.45)
+)
+
+readr::write_csv(
+  observations,
+  "data/species_observations.csv"
+)
+
+message("Written: data/species_observations.csv")

@@ -1,11 +1,13 @@
 ---
-title: "R Spatial Tutorial for Conservation Biology"
+title: "4. 📊 R Spatial Tutorial for Conservation Biology"
 subtitle: "Vector and raster analysis, species distribution mapping with sf, terra, ggplot2, and tmap"
 author: "Conservation Biology Course"
 date: today
 ---
 
 ## Introduction
+
+Overall QGIS is used for the graphical overview and analysis of spatial data. However, for more complex analyses and reproducible workflows, R is a powerful tool. You can create all the maps also in R and use the same data as in QGIS. Here we wanna show you how R is used for spacial analysis and mapping. The tutorial is designed to be self-contained, but you can also work through it in any order that suits your interests and needs. The data provided is synthetic example data created for teaching purposes, so feel free to replace it with your own field data when working through the exercises. The website [https://rspatial.org/](https://rspatial.org/) is a great resource for learning more about spatial analysis in R.
 
 This tutorial walks through a reproducible R workflow for analysing and
 visualising spatial biodiversity data. We will:
@@ -15,11 +17,12 @@ visualising spatial biodiversity data. We will:
 3. Wrangle and summarise species occurrence records.
 4. Create static maps with `ggplot2`.
 5. Create interactive maps with `tmap`.
-6. Perform a simple habitat-suitability overlay.
+6. Create buffers around species observations and calculate the area of suitable habitat.
+7. Perform a simple habitat-suitability overlay.
 
 ---
 
-## Required packages
+## Required packages and data
 
 Install once (skip if already installed):
 
@@ -28,9 +31,9 @@ Install once (skip if already installed):
 #| eval: false
 
 install.packages(c(
-  "sf",        # vector data (Simple Features)
-  "terra",     # raster data
-  "ggplot2",   # static mapping
+  "sf",        # vector data (Simple Features); handling vector data such as points and polygons
+  "terra",     # raster data; reading and processing raster data
+  "ggplot2",   # static mapping; data visualisation
   "tmap",      # thematic / interactive maps
   "dplyr",     # data wrangling
   "readr",     # fast CSV reading
@@ -54,26 +57,47 @@ library(readr)
 library(viridis)
 library(ggspatial)
 library(scales)
-
+library(leaflet)
 ```
+
+We will use the following example datasets throughout the tutorial:
+- `data/study_area.gpkg`: Study area polygon (vector)
+- `data/species_observations.csv`: Georeferenced species occurrence records (CSV)
+- `data/land_cover.tif`: Land-cover raster (GeoTIFF)
 
 ---
 
 ## Loading spatial data
 
-### Study-area polygon (vector)
+### Inspecting the data
 
+Before starting any analysis it is good practice to inspect the imported objects.
+
+Questions to ask yourself:
+
+- What geometry type does the dataset contain?
+- Which coordinate reference system (CRS) is used?
+- How many observations are available?
+- Which variables are stored in the attribute table?
+
+
+### Study-area polygon (vector)
+First we load the study-area polygon, which defines the geographic extent of our analysis. This polygon is stored in a GeoPackage file and will be used to clip species observations and raster data to the relevant area. You could also open this file in QGIS to inspect the geometry and attributes.
 ```{r}
 #| label: load-study-area
+#| results: hide
+
 
 study_area <- sf::st_read("data/study_area.gpkg", quiet = TRUE)
-print(study_area)
+plot(sf::st_geometry(study_area), main = "Study area polygon")
+
 ```
 
 Key attributes to check:
 
 ```{r}
 #| label: check-crs
+#| results: hide
 
 sf::st_crs(study_area)   # coordinate reference system
 sf::st_bbox(study_area)  # bounding box
@@ -84,6 +108,7 @@ sf::st_bbox(study_area)  # bounding box
 ```{r}
 #| label: load-observations
 
+
 obs_raw <- readr::read_csv("data/species_observations.csv", show_col_types = FALSE)
 head(obs_raw)
 ```
@@ -92,28 +117,46 @@ Convert to an `sf` point object:
 
 ```{r}
 #| label: csv-to-sf
+#| results: hide
 
 obs <- sf::st_as_sf(
   obs_raw,
   coords = c("longitude", "latitude"),
   crs    = 4326          # WGS 84
 )
-print(obs)
+head(obs)
 ```
 
 ### Land-cover raster
 
+Raster datasets consist of equally sized cells (pixels). Each cell stores one value representing a variable such as elevation, temperature or land cover.
+
+Unlike vector data, raster data are continuous over space and therefore particularly useful for environmental modelling.
 ```{r}
 #| label: load-raster
+#| results: hide
 
 lc <- terra::rast("data/land_cover.tif")
-print(lc)
+
+# Assign names to the land-cover classes
+levels(lc) <- data.frame(
+  ID = 1:4,
+  class = c(
+    "Agricultural land",
+    "Forest",
+    "Shrubland",
+    "Urban"
+  )
+)
+
 terra::plot(lc, main = "Land cover")
+terra::freq(lc)
 ```
 
----
 
 ## Data wrangling
+
+Now we will prepare the data for analysis and mapping. 
 
 ### Reproject to a metric CRS
 
@@ -122,7 +165,7 @@ Here we use **UTM Zone 33N (EPSG:32633)**; adjust for your study region.
 
 ```{r}
 #| label: reproject
-
+#| results: hide
 target_crs <- 32633
 
 study_area_utm <- sf::st_transform(study_area, crs = target_crs)
@@ -133,6 +176,8 @@ lc_utm         <- terra::project(lc, paste0("EPSG:", target_crs),
 
 ### Clip observations to the study area
 
+We will filter the species observations to only include those that fall within the study area polygon. This ensures that our analysis focuses on the relevant geographic region.
+
 ```{r}
 #| label: clip-observations
 
@@ -142,8 +187,11 @@ cat("Observations inside study area:", nrow(obs_inside), "\n")
 
 ### Summarise by species
 
+To understand the distribution of species observations, we can summarise the number of observations per species. This will help us identify which species are most frequently observed in the study area.
+
 ```{r}
 #| label: species-summary
+
 
 species_count <- obs_inside |>
   dplyr::count(species, name = "n_observations") |>
@@ -154,8 +202,11 @@ print(species_count)
 
 ### Extract land-cover values at observation points
 
+Now we extract the land-cover class at each species observation.
+For every observation point, the raster value at its location is extracted and stored as a new attribute (land_cover_class). This allows us to analyse which habitat types are most frequently used by the observed species.
 ```{r}
 #| label: extract-land-cover
+
 
 obs_lc <- obs_inside |>
   dplyr::mutate(
@@ -163,16 +214,20 @@ obs_lc <- obs_inside |>
   )
 
 table(obs_lc$land_cover_class, useNA = "ifany")
+head(obs_lc$land_cover_class)
 ```
 
 ---
 
 ## Static maps with ggplot2
 
+Here we create static maps using `ggplot2` and `ggspatial`. Adjust the aesthetics and themes as needed for your publication or presentation. A static map is a snapshot of the data at a given time and is suitable for reports, publications, or presentations. 
+
 ### Basic observation map
 
 ```{r}
 #| label: fig-obs-map
+#| results: hide
 #| fig-cap: "Species observations inside the study area."
 
 ggplot2::ggplot() +
@@ -196,8 +251,10 @@ ggplot2::ggplot() +
 
 ### Observation density map
 
+To visualise the spatial density of species observations, we can create a density map using `stat_density_2d`. This highlights areas with higher concentrations of observations, which can be useful for identifying hotspots of biodiversity or areas of particular interest for conservation efforts.
 ```{r}
 #| label: fig-density-map
+#| results: hide
 #| fig-cap: "Spatial density of all observations."
 
 # Convert to a regular data frame for stat_density_2d
@@ -231,9 +288,10 @@ ggplot2::ggplot() +
 ```
 
 ### Bar chart of observations per land-cover class
-
+If you want to visualise the number of observations per land-cover class, you can create a bar chart. This helps to understand the habitat preferences of the observed species and can inform conservation strategies.
 ```{r}
 #| label: fig-lc-barplot
+#| results: hide
 #| fig-cap: "Number of observations per land-cover class."
 
 obs_lc |>
@@ -256,12 +314,13 @@ obs_lc |>
 ## Interactive maps with tmap
 
 `tmap` can render maps in interactive (leaflet) mode – useful for exploring data
-before finalising figures.
+before finalising figures. Interactive maps allow users to zoom, pan, and click on features to view attributes. This is particularly useful for exploratory data analysis and presentations.
 
 ```{r}
 #| label: fig-tmap-interactive
 #| fig-cap: "Interactive map of species observations."
-#| eval: false
+
+
 tmap::tmap_mode("view")   # switch to interactive mode
 
 tmap::tm_shape(study_area_utm) +
@@ -288,14 +347,56 @@ tmap::tmap_mode("plot")
 
 ---
 
-## Habitat suitability overlay
+## Buffers and area calculation
+Buffers create zones around geographic features.
 
-A simple presence-only habitat-suitability index based on land-cover preference.
+In conservation biology they are commonly used to
 
-### Calculate land-cover preference per species
+- estimate the area potentially used by a species
+- identify habitats surrounding observations
+- analyse the influence of roads or rivers
+- study the impact of (human) activities areas
+
+<details>
+<summary>Show buffer area results</summary>
 
 ```{r}
+#| echo: true
+
+buffer_500 <- st_buffer(obs_inside, dist = 5000)
+
+ggplot() +
+    geom_sf(data = study_area,
+            fill = "grey95") +
+    geom_sf(data = buffer_500,
+            fill = "steelblue",
+            alpha = .4) +
+    geom_sf(data = obs_inside,
+            colour = "red",
+            size = 2)
+
+# # Calculate the area of each buffer in hectares
+buffer_area <- st_area(buffer_500) / 10000
+
+# Calculate the total buffer area
+total_buffer_area <- sum(buffer_area)
+
+# Print a short summary
+cat("Number of buffers:", length(buffer_area), "\n")
+cat("Total buffer area:", round(as.numeric(total_buffer_area), 1), "ha\n")
+cat("Mean buffer area:", round(mean(as.numeric(buffer_area)), 1), "ha\n")
+
+summary(total_buffer_area)
+
+```
+</details>
+
+
+### Calculate land-cover preference per species
+When analyzing habitat preferences, it can be useful to calculate the proportion of observations in each land-cover class for each species. This helps to identify which habitats are most frequently used by the observed species.
+```{r}
 #| label: lc-preference
+#| results: hide
 
 # Proportion of observations in each land-cover class per species
 lc_pref <- obs_lc |>
@@ -306,13 +407,14 @@ lc_pref <- obs_lc |>
   dplyr::mutate(proportion = n / sum(n)) |>
   dplyr::ungroup()
 
-print(lc_pref)
+head(lc_pref)
 ```
 
 ### Map preferred land-cover per species
-
+There are several ways to visualise land-cover preferences. One approach is to create a bar chart showing the proportion of observations in each land-cover class for each species. This allows for easy comparison of habitat use across species.
 ```{r}
 #| label: fig-lc-preference
+#| results: hide
 #| fig-cap: "Land-cover preference per species (proportion of observations)."
 
 lc_pref |>
@@ -334,14 +436,29 @@ lc_pref |>
 
 ### Reclassify raster to suitability score
 
-As a simplified example, assign a suitability score (0–3) to each land-cover
-class for one focal species:
+As a simplified example, assign a suitability score (0–3) to each land-cover class for one focal species:
 
 ```{r}
 #| label: suitability-raster
+#| results: hide
 
 # Example lookup: class -> suitability (0 = unsuitable, 3 = most suitable)
 # Adjust class IDs to match your actual raster values
+# Raster laden
+lc <- terra::rast("data/land_cover.tif")
+
+# CRS festlegen
+target_crs <- 32633
+
+# Raster reprojizieren
+lc_utm <- terra::project(
+  lc,
+  paste0("EPSG:", target_crs),
+  method = "near"
+)
+
+
+
 suitability_matrix <- matrix(
   c(1, 1,   # class 1 -> suitability 1 (e.g. agricultural land)
     2, 3,   # class 2 -> suitability 3 (e.g. forest)
@@ -351,14 +468,23 @@ suitability_matrix <- matrix(
 )
 
 suitability <- terra::classify(lc_utm, suitability_matrix)
-names(suitability) <- "suitability"
-terra::plot(suitability, col = viridis::viridis(4), main = "Habitat suitability")
+
+suitability <- terra::as.factor(suitability)
+
+levels(suitability)[[1]] <- data.frame(
+  value = c(0,1,2,3),
+  suitability = c("Unsuitable", "Low", "Medium", "High")
+)
+
+plot(suitability, col = viridis::viridis(4))
 ```
 
 ### Suitability map with ggplot2
+To visualise the habitat suitability raster along with species observations, we can create a map using `ggplot2`. This map will help us understand the spatial distribution of suitable habitats in relation to the observed species occurrences.
 
 ```{r}
 #| label: fig-suitability-map
+#| results: hide
 #| fig-cap: "Habitat suitability raster overlaid with species observations."
 
 # Convert raster to data frame for ggplot2
@@ -370,7 +496,7 @@ ggplot2::ggplot() +
     data = suit_df,
     ggplot2::aes(x = x, y = y, fill = score)
   ) +
-  scale_fill_viridis_c(name = "Suitability", option = "D", na.value = "white") +
+  scale_fill_viridis_d(name = "Suitability", option = "D", na.value = "white") +
   ggplot2::geom_sf(data = study_area_utm, fill = NA, colour = "black", linewidth = 0.8) +
   ggplot2::geom_sf(
     data  = obs_inside,
@@ -392,8 +518,11 @@ ggplot2::ggplot() +
 
 ## Saving outputs
 
+Now that we have created our maps and analyses, we can save the outputs for future use or for sharing with others. This includes exporting the clipped observations, saving the habitat suitability raster, and saving the ggplot figure.
+
 ```{r}
 #| label: save-outputs
+#| results: hide
 #| eval: false
 
 # Export clipped observations

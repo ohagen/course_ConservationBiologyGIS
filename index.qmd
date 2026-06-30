@@ -1,5 +1,5 @@
 ---
-title: "Practical Part"
+title: "1. 🔎 Introduction"
 subtitle: "Biotype Mapping and Data Processing with QGIS and R"
 author: "Conservation Biology Course"
 date: today
@@ -22,6 +22,7 @@ The tutorials are designed to be self-contained, but you can also work through t
 | [QField Tutorial](qfield_tutorial.qmd) | Fieldwork, Biotope types | QField v4.1.12 |
 | [QGIS Tutorial](qgis_tutorial.qmd) | Map layers, projections, spatial queries, map export | QGIS 4.0 |
 | [R Spatial Tutorial](r_spatial_tutorial.qmd) | Vector/raster analysis, species distribution mapping | R ≥ 4.2 |
+| [Cheat Sheet](cheat_sheet.qmd) | Tips and tricks for working with QGIS | QGIS 4.0 |
 
 ## Data
 
@@ -29,11 +30,15 @@ Example data used throughout the tutorials live in the `data/` folder:
 
 | File                            | Description                              |
 |------------------------|------------------------------------------------|
-| `data/study_area.gpkg`          | Study-area polygon (GeoPackage)          |
+| `data/Biotope_Mapping.qgz`      | Biotope mapping data (QGIS project)      |
+| `data/Biotope_mapping_GroupX.gpkg`      | Biotope mapping data (GeoPackage)|
+| `data/Naturschutzgebiete_20XX.gpkg` | Conservation area data (GeoPackage)  |
+| `data/Study_areas_20XX.gpkg` | Study area boundaries (GeoPackage) |
 | `data/species_observations.csv` | Georeferenced species occurrence records |
 | `data/land_cover.tif`           | Land-cover raster (GeoTIFF)              |
+| `data/study_area.gpkg`           | Study area boundaries (GeoPackage)             |
 
-> **Note:** The data files provided are synthetic example datasets created for teaching purposes. Replace them with your own field data when working through the exercises.
+> **Note:** The data files provided are synthetic example datasets created for teaching purposes. Replace them with your own field data when working through the exercises. 
 
 ## Prerequisites (but not mandatory)
 

@@ -1,35 +1,36 @@
 ---
-title: "QField Tutorial"
+title: "2. 🏞️ QField Application"
 subtitle: "Biotope Mapping and Data Collection in the Field"
 author: "Conservation Biology Course"
 date: today
 ---
 
 ## Introduction
+
+![](figures/QField_Introduction_start.png){fig-align="center" width="15cm"}
+
 We will use QField, a mobile GIS application, to collect georeferenced data on biotope types in the field. This tutorial will guide you through setting up a QGIS project for field data collection, configuring forms for data entry, and syncing data between your mobile device and desktop.
 
-## Login 
-To use QField, you need to create a QGIS Cloud account. This allows you to sync your projects and data between your desktop and mobile device. You can sign up for a free account at [QGIS Cloud](https://qgiscloud.com/).
+## Login
+
+To use QField, you need to create a QGIS Cloud account. This allows you to sync your projects and data between your desktop and mobile device. You can sign up for a free account at [QGIS Cloud](https://qgiscloud.com/). More information regaarding detail steps for setting up your account and syncing data can be found in the [QField Ecosystem Documentation](https://docs.qfield.org/get-started/).
 
 ## Setting up a QGIS project for QField
-1. Open QGIS on your desktop and create a new project.
-2. Add the `study_area.gpkg` layer from the `data/` folder to your project.
-3. Create a new point layer for biotope observations. Set the geometry type to "Point" and add fields for "Object_Number" (integer) and "Remarks" (text). 
-Create another layer for your "Biotope_Type_Polygons" with geometry type "Polygon" and a field for "Biotope_Type_Number" (text), "Object_Number" (integer), "Additional_Code" (text), "Remarks" (text).
-4. Save your project and name it "Biotope_Mapping.qgz".
-5. Go to the QGIS Cloud plugin and log in with your QGIS Cloud account.
-6. Publish your project to QGIS Cloud. This will make it available for syncing with QField.
 
-
+1.  Open QGIS on your desktop and create a new project.
+2.  Add the `Study_area_20XX.gpkg` layer from the `data/` folder to your project.
+3.  To orientate in the field you need a basmeap layer like Open Strees Map or Satellite imagery. [Zur Erklärung](qgis_tutorial.qmd#Loading-background-basemap-layers)
+4.  Create a new Point Layer for biotope observations "[**Biotope_observations**]{.underline}". Set the geometry type to **"Point"** and add fields for **"Object_Number"** (integer) and **"Remarks"** (text). Create another layer for your **"[Biotope_Type_Polygons]{.underline}"** with geometry type **"Polygon"** and a field for **"Biotope_Type_Number"** (text), **"Object_Number"** (integer), **"Additional_Code"** (text), **"Remarks"** (text).
+5.  Save your project and name it "Biotope_Mapping.qgz".
+6.  Go to the QGIS Cloud plugin and log in with your QGIS Cloud account.
+7.  Publish your project to QGIS Cloud. This will make it available for syncing with QField.
 
 ## Mapping
-In the field, you will use QField to map biotope types by creating polygons and points. You can fill in the attributes for each feature using the forms you set up in QGIS. 
-You can eather work ofline and sync your data later (download your study area before going into the field), or work online and have your data synced in real-time.
 
---> you probably need a mobile battery for your phone, because mapping can be quite energy consuming
+In the field, you will use QField to map biotope types by creating polygons and points. You can fill in the attributes for each feature using the forms you set up in QGIS. You can either work offline and sync your data later (download your study area before going into the field) or work online and have your data synchronized in real time.
 
-## Syncing and exporting data
-After your fieldwork, you can sync your data back to QGIS Cloud and download it to your desktop for further analysis. You can also export your data as a GeoPackage or shapefile for use in other GIS software or R. 
+<i class="bi bi-lightningf"></i> You will probably need a power bank for your phone, as mapping and GPS usage can consume a significant amount of battery power.
 
+## Syncing and Exporting Data
 
-
+After your fieldwork, you can sync your data back to QGIS Cloud and download it to your desktop for further analysis. You can also export your data as a GeoPackage or Shapefile for use in other GIS software or in R.
