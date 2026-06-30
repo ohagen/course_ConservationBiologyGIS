@@ -1,0 +1,135 @@
+---
+title: "QGIS Workflow to create maps"
+subtitle: "Postprocessing and map design in QGIS"
+author: "Conservation Biology Course"
+date: today
+---
+
+## Overview
+
+In this tutorial, we will cover the postprocessing steps in QGIS to create maps for your conservation project. This includes styling your layers, creating a map layout, and exporting your map for use in reports and presentations. We will also discuss best practices for map design to effectively communicate your findings.
+
+**Recommended Workflow**
+
+1.  **Load your data**: Open your QGIS project and load the relevant layers (We did that in the previous tutorial).
+2.  **Reprocess your data**: Clipping of polygons to the study area, clean overlapping polygons, look at your attribute table and check for errors, add new fields for your analysis, etc.
+3.  **Style your layers/ Change properties**: Use the layer styling options to choose appropriate symbology for your layers. For example, you can use different colors or symbols to represent different biotope types
+4.  **Create a map layout**: Use the Print Layout feature in QGIS to create a map layout. Add your map, legend, scale bar, north arrow, and any other elements you want to include. Arrange them in a visually appealing way.
+5.  **Export your map**: Export your map as a high-resolution image (e.g., PNG or JPEG) or as a PDF for use in your reports and presentations.
+
+We will now go through each of these steps in more detail, with tips and best practices for creating effective maps that communicate your conservation findings clearly and effectively.
+
+## Reprocess your data
+
+Before styling your layers and creating your map layout, it is important to ensure that your data is clean and properly processed. This may involve steps such as clipping your polygons to the study area, cleaning overlapping polygons, checking your attribute table for errors, and adding new fields for your analysis. By taking the time to reprocess your data, you can ensure that your maps are accurate and effectively communicate your findings.
+
+### Edit Polygons
+
+Sometimes you need to edit the geometry of your polygons (e.g. to correct digitising errors or to merge adjacent polygons). To do this:
+
+1.  Ensure to have the important Toolbars visible. Go to **View → Toolbars** and enable the **Digitizing Toolbar** and the **Advanced Digitizing Toolbar**. These toolbars provide you with the necessary tools for editing vector features in QGIS.
+2.  Ensure the layer is in **Editing** mode (pencil icon). Klick on Enable Snapping 🧲, Activtae Snap to intersections and enable tracing.
+3.  Set transparency of the layer to see underlying features (e.g. 50%).
+4.  Select the polygon(s) you want to edit.
+5.  Use the **Node Tool** (F2) to modify vertices or edges. Other tools you can use:
+    -   **Move Feature** (F1) to move entire polygons.
+    -   **Add Ring** to add holes or islands.
+    -   **Delete Ring** to remove holes.
+    -   **Merge Selected Features** to combine adjacent polygons into one.
+6.  Save your edits.
+
+➡️ try to not have gaps or overlapping polygons. This will make your analysis and map design easier later on.
+
+![Description of the Toolbars](figures/QGIS_Tutorial_Digitalization_Tools.png){fig-align="center" width="30cm"}
+
+### Edit Attributes
+
+To edit the attributes of a feature (e.g. to assign a biotope type number): 
+1.  Open the **Attribute Table** of the layer with a right click. 
+2.  Click the **Toggle Editing Mode** (pencil icon). 
+3.  Select the feature you want to edit (e.g. a polygon) or select **New Field** to add a new attribute
+4.  Click the cell you want to edit and enter the new value (e.g. `8140` for a forest biotope type) or type in the new field name and data type (e.g. `biotope_conservation_status` as an text). 
+5.  Save your edits.
+
+### Change Properties of a layer
+
+To change the symbology of a layer, right-click the layer in the **Layers** panel and select **Properties**. In the **Symbology** tab, you can choose how to represent your data (e.g. colour, size, shape). For example, you can set the `species_observations` points to be coloured by species name or sized by observation count.
+
+![](figures/QGIS_Tutorial_properties.png){fig-align="center" width="10cm"}
+
+### Categorized colours for points or polygons
+
+1.  Double-click `Biotype_polygons` → **Symbology** tab.
+2.  Set **Single Symbol** to *Categorized*.
+3.  **Value** → `biotope_type_number`.
+4.  Click **Classify** to auto-assign a colour per Biotope Type class.
+5.  Assign meaningful colours (e.g. green for forest, yellow for grassland).
+6.  Click **OK**.
+
+![](figures/QGIS_Tutorial_polygon_categories.png){fig-align="center" width="10cm"}
+
+### Select by attribute
+
+To select all observations of a particular biotope type:
+
+1.  Open the **Attribute Table** of `Biotype_mapping_GroupX - Biotype_polygons` (`F6`).
+2.  Click the **Select features using an expression** button (ε icon).
+3.  Enter the expression: `"biotope_type_number" = '8140'`
+4.  Click **Select Features**.
+
+Selected records are highlighted in yellow on the map and in the table. You can then export the selected features or perform further analysis on them.
+
+### Select by location (spatial join)
+
+To find which observations fall inside the study area:
+
+1.  **Vector → Research Tools → Select by Location…**
+2.  **Select features from** → `species_observations`
+3.  **where the features** → *intersect*
+4.  **by comparing to the features from** → `study_area`
+5.  Click **Run**.
+
+Only points inside the study-area polygon are selected.
+
+### Export selected features
+
+1.  Right-click `Biotype_polygons` in the Layers panel.
+2.  **Export → Save Selected Features As…**
+3.  Choose format *GeoPackage*, set a filename, and click **OK**.
+
+### Add vector datasets (Paths, Streams, Steets etc.)
+
+You can add additional vector datasets by yourself to your project, such as roads, rivers, or administrative boundaries. Create new Geopackage Layer and digitise these features manually. 1. **Layer → Create Layer → New GeoPackage Layer…** 2. Set **Database** to `data/your_project.gpkg` and **Layer name** to e.g. `roads`. 3. Set **Geometry type** to *Line* and add fields for attributes (e.g. `name` for road name). 4. Click **OK** and the new layer will be added to your project. You can then use the **Digitising tools** to draw roads, rivers. Make sure to save your edits when done.
+
+## Creating a print layout (map export)
+
+1.  **Project → New Print Layout…** – give it a name such as *Study Area Map*.
+2.  The **Print Layout** editor opens.
+3.  Add a map frame: **Add Item → Add Map** and draw a rectangle.
+4.  Add a legend: **Add Item → Add Legend** – drag it to a corner. You can customize the legend items and style in the **Item Properties** panel.
+5.  Add a north arrow: **Add Item → Add North Arrow**.
+6.  Add a scale bar: **Add Item → Add Scale Bar**.
+7.  Add a title: **Add Item → Add Label**, type your title and increase font size.
+8.  Export the map:
+    -   **Layout → Export as PDF…** to produce a vector PDF.
+    -   **Layout → Export as Image…** to produce a PNG/JPEG.
+
+## Summary
+
+In this tutorial you learned how to:
+
+-   Load vector (GeoPackage, CSV) and raster (GeoTIFF) data in QGIS.
+-   Inspect and change coordinate reference systems.
+-   Eddit your data (geometry and attributes).
+-   Select features by attribute and by spatial relationship.
+-   Symbolise layers and create a print-ready map layout.
+
+With that you should be able to create maps for your protocol and presentation e.g.:
+
+-   overview map with numbers for each polygon/ plot
+-   map with biotope types and species observations
+-   soil type map
+-   action plan map
+-   map with Ellenberg indicator values for each plot
+
+Continue to the [R Spatial Tutorial](r_spatial_tutorial.qmd) to perform the same kinds of analysis programmatically in R.

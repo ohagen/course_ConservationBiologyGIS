@@ -1,0 +1,43 @@
+---
+title: "Cheat Sheet"
+subtitle: "Extra tips and tricks for working with QGIS"
+author: "Conservation Biology Course"
+date: today
+---
+
+## Introduction
+
+This cheat sheet provides additional tips and tricks for working with QGIS, based on common questions and challenges that arise during the tutorials. It covers topics such as data management, symbology, spatial analysis, and map layout design. Use it as a quick reference guide to enhance your QGIS skills and make your workflow more efficient.
+
+## Settings for QGIS 
+-   **Default CRS**: Set a default CRS for new projects in *Settings → Options → CRS*. This ensures that all new projects start with a consistent coordinate reference system.
+-   **Default Save Format**: In *Settings → Options → Data Sources*, set the default save format for vector layers to GeoPackage. This is a modern, efficient format that supports multiple layers in a single file and is widely compatible with other GIS software.
+
+- Klick right on the Toolbar and select "Digitizing" to add the digitizing toolbar, which provides tools for creating and editing vector features.
+
+
+--> Screenshot 
+- For edeting your polygons click on Enable Snapping (magnet symbol), select Segments and enable Snapping on Intersections. This will help you to create clean polygons without gaps or overlaps.
+
+## Different Data Formats
+-   **QGIS Project (.qgz)**: A file that saves your QGIS workspace, including layer styles, symbology, and project settings. Use this format to save your work and share it with others who can open it in QGIS.
+-   **GeoPackage (.gpkg)**: A modern, efficient format for storing vector and raster data. It supports multiple layers in a single file and is widely compatible with other GIS software. Use GeoPackage for your project data to keep everything organized and easily shareable.
+-   **Shapefile (.shp, .shx, .dbf)**: An older format for vector data that consists of multiple files. It has limitations such as a maximum file size of 2 GB and limited attribute field names. Use shapefiles only if you need compatibility with legacy software.
+-   **GeoTIFF**: A format for raster data that includes georeferencing information. Use GeoTIFF for your land-cover raster and other raster datasets to ensure they are properly aligned with your vector data.
+-   **CSV with coordinates**: A simple format for tabular data that includes latitude and longitude fields. Use this format for species observation records or other point data that can be easily imported as a delimited text layer in QGIS.
+-   **KML/KMZ**: A format for storing geospatial data that is widely supported by web mapping applications. Use KML/KMZ for sharing your maps and data with others who may not have QGIS installed.
+
+
+
+
+
+## Useful QGIS plugins for conservation biology
+
+| Plugin                            | Purpose                              |
+|-----------------------------------|--------------------------------------|
+| **QuickMapServices**              | Background satellite/OSM imagery     |
+| **GBIF Occurrences**              | Download species records from GBIF   |
+| **Semi-Automatic Classification** | Supervised land-cover classification |
+| **Profile Tool**                  | Elevation profiles along transects   |
+
+Install plugins via **Plugins → Manage and Install Plugins…**
