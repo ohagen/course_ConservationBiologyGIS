@@ -61,7 +61,7 @@ library(scales)
 
 ## Loading spatial data
 
-### Study-area polygon (vector)
+### 2.1 Study-area polygon (vector)
 
 ```{r}
 #| label: load-study-area
@@ -101,7 +101,7 @@ obs <- sf::st_as_sf(
 print(obs)
 ```
 
-### Land-cover raster
+### 2.3 Land-cover raster
 
 ```{r}
 #| label: load-raster
@@ -115,7 +115,7 @@ terra::plot(lc, main = "Land cover")
 
 ## Data wrangling
 
-### Reproject to a metric CRS
+### 3.1 Reproject to a metric CRS
 
 For distance- or area-based analyses, project all layers to the same metric CRS.
 Here we use **UTM Zone 33N (EPSG:32633)**; adjust for your study region.
@@ -131,7 +131,7 @@ lc_utm         <- terra::project(lc, paste0("EPSG:", target_crs),
                                  method = "near")  # categorical raster
 ```
 
-### Clip observations to the study area
+### 3.2 Clip observations to the study area
 
 ```{r}
 #| label: clip-observations
@@ -140,7 +140,7 @@ obs_inside <- obs_utm[sf::st_within(obs_utm, study_area_utm, sparse = FALSE), ]
 cat("Observations inside study area:", nrow(obs_inside), "\n")
 ```
 
-### Summarise by species
+### 3.3 Summarise by species
 
 ```{r}
 #| label: species-summary
@@ -152,7 +152,7 @@ species_count <- obs_inside |>
 print(species_count)
 ```
 
-### Extract land-cover values at observation points
+### 3.4 Extract land-cover values at observation points
 
 ```{r}
 #| label: extract-land-cover
@@ -169,7 +169,7 @@ table(obs_lc$land_cover_class, useNA = "ifany")
 
 ## Static maps with ggplot2
 
-### Basic observation map
+### 4.1 Basic observation map
 
 ```{r}
 #| label: fig-obs-map
@@ -194,7 +194,7 @@ ggplot2::ggplot() +
   ggplot2::theme_bw()
 ```
 
-### Observation density map
+### 4.2 Observation density map
 
 ```{r}
 #| label: fig-density-map
@@ -230,7 +230,7 @@ ggplot2::ggplot() +
   ggplot2::theme_bw()
 ```
 
-### Bar chart of observations per land-cover class
+### 4.3 Bar chart of observations per land-cover class
 
 ```{r}
 #| label: fig-lc-barplot
@@ -292,7 +292,7 @@ tmap::tmap_mode("plot")
 
 A simple presence-only habitat-suitability index based on land-cover preference.
 
-### Calculate land-cover preference per species
+### 6.1 Calculate land-cover preference per species
 
 ```{r}
 #| label: lc-preference
@@ -309,7 +309,7 @@ lc_pref <- obs_lc |>
 print(lc_pref)
 ```
 
-### Map preferred land-cover per species
+### 6.2 Map preferred land-cover per species
 
 ```{r}
 #| label: fig-lc-preference
@@ -332,7 +332,7 @@ lc_pref |>
   ggplot2::theme_bw()
 ```
 
-### Reclassify raster to suitability score
+### 6.3 Reclassify raster to suitability score
 
 As a simplified example, assign a suitability score (0–3) to each land-cover
 class for one focal species:
@@ -355,7 +355,7 @@ names(suitability) <- "suitability"
 terra::plot(suitability, col = viridis::viridis(4), main = "Habitat suitability")
 ```
 
-### Suitability map with ggplot2
+### 6.4 Suitability map with ggplot2
 
 ```{r}
 #| label: fig-suitability-map
